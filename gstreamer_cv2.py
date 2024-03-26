@@ -6,7 +6,8 @@ from hand_detect import landmarker_and_result, draw_landmarks_on_image
 
 """
     COMMANDE A LANCER SUR ROBOT:
-    gst-launch-0.10 -v v4l2src device=/dev/video1 ! 'video/x-raw-yuv,width=640, height=480,framerate=30/1' ! ffmpegcolorspace ! jpegenc ! rtpjpegpay ! udpsink host=192.168.1.176 port=3001
+    gst-launch-0.10 -v v4l2src device=/dev/video1 ! 'video/x-raw-yuv,width=640, height=480,framerate=30/1' ! ffmpegcolorspace ! jpegenc ! rtpjpegpay ! udpsink host=192.168.1.123 port=3001
+    mettre l'ip du pc
 
     TO INSTALL:
     pip install opencv-python mediapipe
