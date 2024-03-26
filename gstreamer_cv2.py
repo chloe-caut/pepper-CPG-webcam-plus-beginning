@@ -13,6 +13,7 @@ from hand_detect import landmarker_and_result, draw_landmarks_on_image
     sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
     sudo apt-get install libgirepository1.0-dev
     pip install PyGObject
+    
 """
 
 import time

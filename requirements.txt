@@ -1,0 +1,6 @@
+bibliothèques installées !!!
+
+pip install opencv-python mediapipe
+sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+sudo apt-get install libgirepository1.0-dev
+pip install PyGObject
