@@ -1,5 +1,6 @@
 
 # premier test code propsé par mediapipe.
+# a mettre dans une autre branche que main par contre
 
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
