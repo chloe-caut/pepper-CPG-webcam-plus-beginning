@@ -1,5 +1,9 @@
 import cv2
 from mediapipe import solutions
+
+
+#get-freq-hand-detect.py
+
 '''
 pip install mediapipe
 pip install protobuf==3.20.*
@@ -15,12 +19,13 @@ from pandas import DataFrame
 mphands = solutions.hands
 mpdrawing = solutions.drawing_utils
 
-# Specify the path to your video file
-vidpath = 'F:/Chloe/video_2.mp4'
-file_path = 'F:/Chloe/'
+# path to video file
+#vidpath = 'ooo'
+file_path = '/home/pepper/Documents/pepper-internship/'
 
-# Initialize video capture
-vidcap = cv2.VideoCapture(vidpath)
+# Initialize video capture or use livestream -------------------------------------------------------
+vidcap = cv2.VideoCapture(0)         #camera
+#vidcap = cv2.VideoCapture(vidpath)    #stockée￼
 
 # Set the desired window width and height
 winwidth = 800
@@ -170,9 +175,11 @@ with mphands.Hands(model_complexity=1, min_detection_confidence=0.5, min_trackin
         # Exit loop by pressing 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
 df=DataFrame(L)
 print(df)
-df.to_csv(file_path+'position.csv', sep=';', index = True, header=None)
+df.to_csv(file_path+'position.csv', sep=';', index = True, header=None)     #creatio csv ------------------
+
 # Release the video capture and close windows
 vidcap.release()
 cv2.destroyAllWindows()
