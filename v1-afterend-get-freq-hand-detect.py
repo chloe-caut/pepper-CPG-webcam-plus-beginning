@@ -1,3 +1,5 @@
+#version 1, all landmarks, csv at the end, press q to stop video.
+
 import cv2
 from mediapipe import solutions
 
@@ -21,7 +23,7 @@ mpdrawing = solutions.drawing_utils
 
 # path to video file
 #vidpath = 'ooo'
-file_path = '/home/pepper/Documents/pepper-internship/'
+file_path = '/home/nootnoot/Documents/pepper-internship/'
 
 # Initialize video capture or use livestream -------------------------------------------------------
 vidcap = cv2.VideoCapture(0)         #camera

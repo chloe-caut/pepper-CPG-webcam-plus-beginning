@@ -1,3 +1,6 @@
+#frequency analysys for hand detect version 1.
+
+
 from pandas import read_csv
 import numpy as np 
 import pandas as pd 
@@ -6,7 +9,7 @@ import pywt
 import matplotlib.pyplot as plt
 
 
-path_file='/home/pepper/Documents/pepper-internship/position.csv'
+path_file='/home/nootnoot/Documents/pepper-internship/position.csv'
 
 def load_csv(path):
     df = read_csv(path_file, sep=';', header=None)
