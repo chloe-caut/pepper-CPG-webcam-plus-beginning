@@ -14,13 +14,23 @@
 
 import cv2
 from mediapipe import solutions
+
+
+#imports pour hebb
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+import scipy.signal
+#fin imports pour hebb
+
+#reqs de v2
 '''
 pip install mediapipe
 pip install protobuf==3.20.*
 '''
 
 
-
+#reqs à utiliser dans le futur, vienent de la version v0 compatible avec le robot- voir modifs
 """
     COMMANDE A LANCER SUR ROBOT:
     gst-launch-0.10 -v v4l2src device=/dev/video1 ! 'video/x-raw-yuv,width=640, height=480,framerate=30/1' ! ffmpegcolorspace ! jpegenc ! rtpjpegpay ! udpsink host=192.168.1.123 port=3001
@@ -184,42 +194,18 @@ def followPosition(processFrames,lm,frame,handNo=0):
             cx,cy = int(lm.x*w),int(lm.y*h)
             if id==0:
                 position=(cx,cy)    
-                IinjListe.append(position) #modif de remplisssage de liste!!!!!! Addon v2 to v3 ici !!!!!!!!!!!!!!!!!!!!! juste cette ligne
+                IinjListe.append(position[0]) #modif de remplisssage de liste!!!!!! Addon v2 to v3 ici !!!!!!!!!!!!!!!!!!!!!!!!! juste cette ligne
     return position   
 
 
-###############################################################################################
-###############################################################################################
-###############################################################################################
-###############################################################################################
-# add on pour mixer avec hebb ici
-###############################################################################################
-###############################################################################################
-###############################################################################################
-###############################################################################################
-
-#si on fait du real time, la valaur de IInj à utiliser est la dernière de la liste. je garde 
-#tout en liste (comment gérer le temps? il fait que les coups d'horloge soient les frames non?) 
-#ou je met en temporel l'horloge du pc, avec la bilbio time je crois, mais pour les pas d'apprentissage la 
-#dans la fonction hebb uniquement, j'utilise les frames pour actualiser sigma s.
-
-
-
-
-
-
-
 
 ###############################################################################################
 ###############################################################################################
 ###############################################################################################
 ###############################################################################################
-#fin addon hebb
 
-###############################################################################################
-###############################################################################################
-###############################################################################################
-###############################################################################################
+
+
 
 mp_drawing = solutions.drawing_utils
 mp_drawing_styles = solutions.drawing_styles
@@ -265,6 +251,8 @@ with mphands.Hands(model_complexity=1, min_detection_confidence=0.5, min_trackin
 
         # Display the resized frame
         cv2.imshow('Hand Tracking', resized_frame)
+
+        
         
         # Exit loop by pressing 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -278,6 +266,7 @@ def main():
     df=DataFrame(L)
     print(df)
     df.to_csv(file_path+'position.csv', sep=';', index = True, header=None)
+   # Vs1,Ts1, I_inj1, liste_sigma_s = simul(neur1)  #addon pour hebb!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! euh jsp
     # Release the video capture and close windows
     vidcap.release()
     cv2.destroyAllWindows()
@@ -289,6 +278,242 @@ def main():
 #A CHANGER ABSOLUMENT APRES OPTI POUR ROBOT CAD V4 ON EST EN V3 OPTI WEBCAM AVEC HEBB
 
 
+
+
+
+
+
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+# add on pour mixer avec hebb ici
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
+#si on fait du real time, la valaur de IInj à utiliser est la dernière de la liste. je garde 
+#tout en liste (comment gérer le temps? il fait que les coups d'horloge soient les frames non?) 
+#ou je met en temporel l'horloge du pc, avec la bilbio time je crois, mais pour les pas d'apprentissage la 
+#dans la fonction hebb uniquement, j'utilise les frames pour actualiser sigma s.
+
+
+
+#toM = 0.35
+#toS = 3.5
+#Af = 1
+#sigmaS = 2
+#"sigmaF = 1.5"
+#w_inj = 0.5 #poids synaptique I_inj
+V0 = 0
+q0 = 0
+dt = 0.01
+eps = 0.1  
+
+class NeuroneRS : pass  #car pas vraie prog obj
+
+
+
+########################################################
+###             état du neurone instant t            ###
+########################################################  
+
+
+def create_NRS(nom='RS1', I_inj = 0.0,w_inj=0.5, V=0.0, sigmaS=2.0 ,sigmaF=1.5,Af = 1,q=0.0):
+    neurone = NeuroneRS()
+    neurone.nom =  nom 
+    neurone.I_inj = I_inj  # courant d'entrée:  peut etre une somme de courants
+    neurone.w_inj =  w_inj  # poids synaptique courant d'entrée 
+    neurone.V=  V    # output neurone- on rappelle V = Vs et la dérivée peut se noter y au lieu de Vs point-
+    neurone.sigmaS =  sigmaS 
+    neurone.sigmaF =  sigmaF 
+    neurone.Af =Af
+    neurone.q = q  #signal slow current
+    neurone.toM = 0.35
+    neurone.toS = 3.5    
+    return neurone
+
+
+
+########################################################
+###          fonctions basiques nécessaire           ###
+######################################################## 
+
+#fonction crée pour raccourcir la notation, aussi appelée F dans les articles
+def F(n):
+    return n.V-n.Af*np.tanh((n.sigmaF/n.Af)*n.V)
+
+#signal de forçage, appelé I_inj mais une ou deux fois F dans les articles: ne pas confondre.
+def Input(t) :
+    #dirac
+    '''
+    I=0
+    if t >=3 and t<=17:
+        I = scipy.signal.square(t, duty= 0.5) '''
+        
+    #carré
+    #I= scipy.signal.square(t, duty= 0.5) 
+
+    #sin
+     #-------------------------------------------------------------------------------ici i inj sinus a freq variable
+    amplitude  = 1
+    freq = 2
+    phase=0
+    I = amplitude * math.sin(6.28 * freq * t + phase )
+
+    return I
+     
+#notation incrémentale à venir à cause de l'intégration    
+
+def f_V(n, t):
+    #attention ici j'utilise la fct input --------------------------------------------------------
+    return  - (F(n)+ n.q - n.w_inj *n.I_inj)  /n.toM
+
+def f_Q(n,t):
+    return (-n.q + n.sigmaS*n.V) /n.toS
+
+
+
+#créatrice de pbs: 
+def f_sigmaS(n,t):
+    #print("fv ",f_V(n,t))  #nan si Input sinus math, ok si input carré scipy
+    #breakpoints pour voir d'ou vient le pb
+    y= f_V(n,t) #premier appel la presque derivée 
+    sousRacine =  y**2 + (n.V)**2 #les carrés
+    racine = math.sqrt( sousRacine ) #la racine
+    quotient = y/ racine #if racine else 0    #la division #################################################################################ici le if else 0
+    sigmasuivant = 2 * eps * n.I_inj * math.sqrt(n.toM*n.toS) * math.sqrt(1+ n.sigmaS - n.sigmaF) *      quotient
+    # 2 * eps * n.I_inj * math.sqrt(n.toM*n.toS) * math.sqrt(1+ n.sigmaS - n.sigmaF) *    f_V(n,t) /  math.sqrt( f_V(n,t)**2 + (n.V)**2  )
+    return sigmasuivant
+
+
+########################################################
+###                   intégration                    ###
+########################################################  
+
+
+#faut il mettre à jour le sigmaS avant ou après calcul de Vs? 
+#comparer les 2, un des cas peut diverger, 
+#sigmaS calculé en fct de l'état courant donc à calculer d'abord car sigmaS de sortie est en t+1
+
+#Methode d'euler pour résoudre les équations différentielles
+#intégration / main / boucle de résolution - trouver nom
+
+
+
+def simul(n):
+    t = 0
+    T = 20                                               # définition du temps de simulation
+    list_V = []
+    list_T = []
+    list_I_inj = []
+    list_sigmaS=[]
+    newtime = len(IinjListe) * dt #nombre de frames en gros fois dt et la on est à nouveau sur des listes de la meme longueur je crois
+
+    #----------------------------------------------------------------ici on +1 les neurones
+   # while t < T :
+    while t <  newtime  : #adapté pour traitement hebb une fois la vidoé arretée!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        #n.I_inj = Input(t)
+        i = int(t / dt)
+        n.I_inj = float( IinjListe[i] )     #voila l'autre changement !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        n.sigmaS = n.sigmaS + dt* f_sigmaS(n,t)
+        n.V      = n.V      + dt* f_V(n,t)
+        n.q      = n.q      + dt* f_Q(n,t)
+        #test
+        '''
+        print ("sortie  :   ",  n.V)
+        print (" q  :   ",  n.q)
+        print ("sigma :   ",  n.sigmaS)
+        print ("i_inj :  ", Input(t))
+        '''
+
+        t += dt
+
+        list_V.append(n.V)
+        list_T.append(t)  
+        #list_I_inj.append(Input(t))  # why did i do this in the first place??? more precise but not really
+        #should be like this either way, no?
+        list_I_inj.append(n.I_inj)    #qui est actuellement la sortie de la liste qui vient de l'autre programme qui a été frankensteiné à celui là
+        list_sigmaS.append(n.sigmaS)
+        
+
+    return list_V, list_T, list_I_inj, list_sigmaS
+
+
+neur1 = create_NRS(nom='RS1', I_inj = 0.0,w_inj=0.1, V=0.001, sigmaS=2.0 ,sigmaF=1.5)  
+#neur2 = create_NRS(nom='RS2', I_inj = 0.0,w_inj=0.5, V=0.0, sigmaS=2.0 ,sigmaF=1.5)
+
+#avant ici, maintenant dans main pour être fait à la fin pour commencer// et back
+Vs1,Ts1, I_inj1, liste_sigma_s = simul(neur1)
+
+#print(liste_sigma_s)
+
+########################################################
+###                      dessin                      ###
+########################################################  
+
+plt.plot(Ts1, Vs1,    '-m',        label ='Vs - signal sortie')
+plt.plot(Ts1, I_inj1,'y--',    label ='I_inj - signal de forçage')
+plt.plot(Ts1, liste_sigma_s, 'b-', label= 'sigma S')
+#Vs2,Ts2 = Neurone_RS(neur2)
+#plt.plot(Ts2, Vs2)
+
+#### labels axes
+plt.xlabel('temps')
+plt.ylabel('intensité')
+
+
+##### titre haut
+plt.suptitle(
+    "CPG ! ",
+    fontsize=16,
+    fontweight="bold",
+    x=0.126,
+    y=0.98,
+    ha="left",
+)
+
+##### sous titre haut
+plt.title(
+    "un neurone, hebbian buggé, et I-inj sortie webcam hand tracking ",
+    fontsize=14,
+    pad=10,
+    loc="left",
+)
+
+#### le carré avec les labels
+plt.legend(loc='upper right')  
+
+
+plt.show()
+
+
+
+
+
+
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+#fin addon hebb
+
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
+
+
+
+
+
+
 if __name__ == '__main__':
     main() 
+
+
+
+
 
