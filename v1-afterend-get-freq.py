@@ -9,7 +9,8 @@ import pywt
 import matplotlib.pyplot as plt
 
 
-path_file='/home/nootnoot/Documents/pepper-internship/position.csv'
+#path_file='/home/nootnoot/Documents/pepper-internship/position.csv'
+path_file = '/home/pepper/Documents/pepper-internship/position.csv'
 
 def load_csv(path):
     df = read_csv(path_file, sep=';', header=None)

@@ -23,7 +23,8 @@ mpdrawing = solutions.drawing_utils
 
 # path to video file
 #vidpath = 'ooo'
-file_path = '/home/nootnoot/Documents/pepper-internship/'
+#file_path = '/home/nootnoot/Documents/pepper-internship/'
+file_path = '/home/pepper/Documents/pepper-internship/'
 
 # Initialize video capture or use livestream -------------------------------------------------------
 vidcap = cv2.VideoCapture(0)         #camera

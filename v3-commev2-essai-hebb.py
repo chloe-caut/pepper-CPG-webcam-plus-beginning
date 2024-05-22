@@ -1,3 +1,5 @@
+#python3 v3-commev2-essai-hebb.py
+
 
 
 #poignet au lieu de barycentre pour économiser. 
@@ -32,7 +34,7 @@ pip install protobuf==3.20.*
 
 #reqs à utiliser dans le futur, vienent de la version v0 compatible avec le robot- voir modifs
 """
-    COMMANDE A LANCER SUR ROBOT:
+    COMMANDE A LANCER SUR ROBOT:file_path = '/home/pepper/Documents/pepper-internship/'
     gst-launch-0.10 -v v4l2src device=/dev/video1 ! 'video/x-raw-yuv,width=640, height=480,framerate=30/1' ! ffmpegcolorspace ! jpegenc ! rtpjpegpay ! udpsink host=192.168.1.123 port=3001
     mettre l'ip du pc
 
@@ -62,7 +64,8 @@ mpdrawing = solutions.drawing_utils
 
 # Specify the path to your video file
 ##vidpath =
-file_path = '/home/nootnoot/Documents/pepper-internship/'
+#file_path = '/home/nootnoot/Documents/pepper-internship/'
+file_path = '/home/pepper/Documents/pepper-internship/'
 
 # Initialize video capture
 vidcap = cv2.VideoCapture(0) #(vidpath)
