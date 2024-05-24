@@ -1,3 +1,8 @@
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
 #python3 v5.py
 
 import cv2
@@ -18,16 +23,26 @@ import scipy.signal
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+
+
 # Initialize mediapipe hands module
 mphands = solutions.hands
 mpdrawing = solutions.drawing_utils
 
 # Specify the path to your video file
-vidpath = 'F:/Chloe/video_2.mp4'
-file_path = 'F:/Chloe/'
+#vidpath = 'F:/Chloe/video_2.mp4'
+#file_path = 'F:/Chloe/'
 
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
 
-#parameters for Hebbian------------------------------------------------------------------------------#
+########################################################
+###                    params hebb                   ###
+######################################################## 
+
 #toM = 0.35
 #toS = 3.5
 #Af = 1
@@ -38,8 +53,17 @@ V0 = 0.01
 q0 = 0.01
 dt = 0.01
 eps = 0.1 
+w_inj_1= 0.01 
 
-#parameters for hands tracking-----------------------------------------------------------------------#
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
+########################################################
+###               params hand tracking               ###
+######################################################## 
+
 _RADIUS = 4
 _RED = (48, 48, 255)
 _GREEN = (48, 255, 48)
@@ -101,6 +125,12 @@ _HAND_CONNECTION_STYLE = {
         DrawingSpec(color=_CYAN, thickness=_THICKNESS_FINGER)
 }
 
+
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
 def get_hand_landmarks_style(): # -> Mapping[int, DrawingSpec]:
     """Returns the default hand landmarks drawing style.
     Returns:
@@ -124,6 +154,7 @@ def get_hand_connections_style(): # -> Mapping[Tuple[int, int], DrawingSpec]:
             hand_connection_style[connection] = v
     return hand_connection_style
 
+
 # Set the desired window width and height
 def rescale_frame(frame, percent):
     width = int(frame.shape[1] * percent/ 100)
@@ -131,12 +162,17 @@ def rescale_frame(frame, percent):
     dim = (width, height)
     return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
 def hands_tracking():
     mp_drawing = solutions.drawing_utils
     #mp_drawing_styles = solutions.drawing_styles
     
     #initialize a neuron
-    neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=0.1, V=0.001, sigmaS=2.0 ,sigmaF=1.5)
+    neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=w_inj_1, V=0.001, sigmaS=2.0 ,sigmaF=1.5) #winj 1 def en haut!!!!!!!!!!!!!!!!!!!!
     
     #Create 5 empty lists
     L, list_V, list_T, list_I_inj, list_sigmaS = [],[],[],[],[]
@@ -203,7 +239,11 @@ def hands_tracking():
          
     return L, list_V, list_T, list_I_inj, list_sigmaS
 
-#---------------HEBBIAN------------------------------------------------------------------------------#
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
 class NeuroneRS : pass  #car pas vraie prog obj
 
 ########################################################
@@ -257,6 +297,7 @@ def f_sigmaS(n,t):
 
 def update_neuron(neurone, t):
     neurone.sigmaS += dt * f_sigmaS(neurone, t)
+    print (neurone.sigmaS) # test ---------------------------------------------------------
     neurone.V += dt * f_V(neurone, t)
     neurone.q += dt * f_Q(neurone, t)
     return neurone.V, neurone.sigmaS, neurone.q
@@ -267,6 +308,7 @@ def update_neuron(neurone, t):
 ########################################################  
 
 #cette verson de plot a des problèmes d'échelle
+'''
 def plot(Vs1, Ts1, I_inj1, sigmaS):
     plt.figure(figsize=(10,6))
     plt.plot(Ts1, Vs1, '-m', label ='Vs - signal sortie')
@@ -298,6 +340,64 @@ def plot(Vs1, Ts1, I_inj1, sigmaS):
 
     plt.show()
 
+'''
+
+def plot(Vs1, Ts1, I_inj1, sigmaS):
+    fig, axs = plt.subplots(3, 1, figsize=(10, 18))
+    ##### titre haut
+    plt.suptitle(
+        "Etude théorique CPGs - 1 neurone  -  w_inj= " + str(w_inj_1) + "  - eps = " + str(eps),
+        fontsize=14,
+        #fontweight="bold",
+        x=0.09,
+        y=1,
+        ha="left",
+    )
+    '''
+    #section qui ne marche plus avec les subplots
+    ##### sous titre haut
+    plt.title(
+        '1 neurone, w_inj= ' + str(neur1.w_inj) + ', eps = ' + str(eps) ,
+        fontsize=14,
+        pad=10,
+        x=0.08,
+        y=1,
+        loc="left",
+    )'''
+
+    # First subplot
+    axs[1].plot(Ts1, I_inj1, 'y--')       #label='I_inj - signal de forçage')
+    axs[1].set_xlabel('temps')
+    axs[1].set_ylabel('I_inj - signal de forçage')
+    #axs[1].legend(loc='upper right')
+    #axs[1].set_title('I_inj - signal de forçage')
+    
+    # Second subplot
+    axs[0].plot(Ts1, Vs1, '-m')           #label='Vs - signal sortie')
+    axs[0].set_xlabel('temps')
+    axs[0].set_ylabel('Vs - signal sortie')
+    #axs[0].legend(loc='upper right')
+    #axs[0].set_title('Vs - signal sortie')
+    
+    # Third subplot
+    axs[2].plot(Ts1, sigmaS, 'b-')      #label='sigma S')
+    axs[2].set_xlabel('temps')
+    axs[2].set_ylabel('sigma S')
+    #axs[2].legend(loc='upper right')
+    #axs[2].set_title('sigma S')
+    
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+
+    # Display the plot
+    plt.show()
+
+
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
 
 def main():
     L, list_V, list_T, list_I_inj, list_sigmaS = hands_tracking()
@@ -312,3 +412,8 @@ def main():
     
 if __name__ == '__main__':
     main()
+
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
