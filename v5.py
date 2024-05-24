@@ -172,7 +172,7 @@ def hands_tracking():
     #mp_drawing_styles = solutions.drawing_styles
     
     #initialize a neuron
-    neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=w_inj_1, V=0.001, sigmaS=2.0 ,sigmaF=1.5) #winj 1 def en haut!!!!!!!!!!!!!!!!!!!!
+    neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=w_inj_1, V=0.001, sigmaS=2.0 ,sigmaF=1.5,Af=1,q=0.01) #winj 1 def en haut!!!!!!!!!!!!!!!!!!!!
     
     #Create 5 empty lists
     L, list_V, list_T, list_I_inj, list_sigmaS = [],[],[],[],[]
@@ -250,7 +250,7 @@ class NeuroneRS : pass  #car pas vraie prog obj
 ###             état du neurone instant t            ###
 ########################################################  
 
-def create_NRS(nom='RS1', I_inj=0.0, w_inj=0.5, V=0.0, sigmaS=2.0 ,sigmaF=1.5, Af=1, q=0.0):
+def create_NRS(nom, I_inj, w_inj, V, sigmaS,sigmaF, Af, q):
     neurone = NeuroneRS()
     neurone.nom =  nom 
     neurone.I_inj = I_inj  # courant d'entrée:  peut etre une somme de courants
@@ -343,10 +343,10 @@ def plot(Vs1, Ts1, I_inj1, sigmaS):
 '''
 
 def plot(Vs1, Ts1, I_inj1, sigmaS):
-    fig, axs = plt.subplots(3, 1, figsize=(10, 18))
+    fig, axs = plt.subplots(2, 1, figsize=(10, 18))
     ##### titre haut
     plt.suptitle(
-        "Etude théorique CPGs - 1 neurone  -  w_inj= " + str(w_inj_1) + "  - eps = " + str(eps),
+        "Etude pratique CPGs - 1neur - input webcam - w_inj= " + str(w_inj_1) + "  - eps = " + str(eps),
         fontsize=14,
         #fontweight="bold",
         x=0.09,
@@ -366,23 +366,26 @@ def plot(Vs1, Ts1, I_inj1, sigmaS):
     )'''
 
     # First subplot
-    axs[1].plot(Ts1, I_inj1, 'y--')       #label='I_inj - signal de forçage')
-    axs[1].set_xlabel('temps')
-    axs[1].set_ylabel('I_inj - signal de forçage')
-    #axs[1].legend(loc='upper right')
+    axs[0].plot(Ts1, I_inj1, 'y--', label='I_inj - signal de forçage')
+    axs[0].plot(Ts1, Vs1, '-m', label='Vs - signal sortie')
+    axs[0].set_xlabel('temps')
+    axs[0].set_ylabel('potentiel')
+    axs[0].legend(loc='upper right')
     #axs[1].set_title('I_inj - signal de forçage')
     
+    '''
     # Second subplot
-    axs[0].plot(Ts1, Vs1, '-m')           #label='Vs - signal sortie')
-    axs[0].set_xlabel('temps')
-    axs[0].set_ylabel('Vs - signal sortie')
+    axs[1].plot(Ts1, Vs1, '-m')           #label='Vs - signal sortie')
+    axs[1].set_xlabel('temps')
+    axs[1].set_ylabel('Vs - signal sortie')
     #axs[0].legend(loc='upper right')
     #axs[0].set_title('Vs - signal sortie')
-    
+    '''
+
     # Third subplot
-    axs[2].plot(Ts1, sigmaS, 'b-')      #label='sigma S')
-    axs[2].set_xlabel('temps')
-    axs[2].set_ylabel('sigma S')
+    axs[1].plot(Ts1, sigmaS, 'b-')      #label='sigma S')
+    axs[1].set_xlabel('temps')
+    axs[1].set_ylabel('sigma S')
     #axs[2].legend(loc='upper right')
     #axs[2].set_title('sigma S')
     
