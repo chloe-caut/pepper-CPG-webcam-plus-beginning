@@ -52,8 +52,8 @@ mpdrawing = solutions.drawing_utils
 V0 = 0.01
 q0 = 0.01
 dt = 0.01
-eps = 0.1 
-w_inj_1= 0.01 
+eps = 0.5
+w_inj_1= 0.5
 
 ###############################################################################################
 ###############################################################################################
@@ -172,7 +172,7 @@ def hands_tracking():
     #mp_drawing_styles = solutions.drawing_styles
     
     #initialize a neuron
-    neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=w_inj_1, V=0.001, sigmaS=2.0 ,sigmaF=1.5,Af=1,q=0.01) #winj 1 def en haut!!!!!!!!!!!!!!!!!!!!
+    neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=w_inj_1, V=0.001, sigmaS=1 ,sigmaF=2,Af=1,q=0.01) #winj 1 def en haut!!!!!!!!!!!!!!!!!!!!
     
     #Create 5 empty lists
     L, list_V, list_T, list_I_inj, list_sigmaS = [],[],[],[],[]
