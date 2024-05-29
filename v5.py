@@ -61,7 +61,7 @@ w_inj_1= 0.5
 ###############################################################################################
 
 ########################################################
-###               params hand tracking               ###
+###                  hand tracking                   ###
 ######################################################## 
 
 _RADIUS = 4
@@ -172,7 +172,7 @@ def hands_tracking():
     #mp_drawing_styles = solutions.drawing_styles
     
     #initialize a neuron
-    neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=w_inj_1, V=0.001, sigmaS=1 ,sigmaF=2,Af=1,q=0.01) #winj 1 def en haut!!!!!!!!!!!!!!!!!!!!
+    neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=w_inj_1, V=0.001, sigmaS=30 ,sigmaF=2,Af=0.2,q=0.01) #winj 1 def en haut!!!!!!!!!!!!!!!!!!!!
     
     #Create 5 empty lists
     L, list_V, list_T, list_I_inj, list_sigmaS = [],[],[],[],[]
@@ -261,7 +261,7 @@ def create_NRS(nom, I_inj, w_inj, V, sigmaS,sigmaF, Af, q):
     neurone.Af =Af
     neurone.q = q  #signal slow current
     neurone.toM = 0.35
-    neurone.toS = 3.5    
+    neurone.toS = 3.5   
     return neurone
 
 
@@ -282,6 +282,7 @@ def f_V(n, t):
 def f_Q(n,t):
     return (-n.q + n.sigmaS*n.V)/n.toS
 
+'''
 def f_sigmaS(n,t):
     y = f_V(n,t) #premier appel de la presque derivée 
     racine = sqrt(y**2 + (n.V)**2) 
@@ -294,6 +295,23 @@ def f_sigmaS(n,t):
         next_sigma = 2 * eps * n.I_inj * radical_1 * sqrt(abs(1+ n.sigmaS - n.sigmaF))*quotient
     
     return next_sigma
+'''
+
+def f_sigmaS(n,t):
+    dot_sigma=400
+    y = f_V(n,t)  #y=dV/dt
+    racine = sqrt(np.float64(y**2 + n.V**2))
+    print(racine, y)
+    
+    if racine == 0:
+        quotient = 0
+    elif n.sigmaF < 1 + n.sigmaS:
+        quotient = y /racine   
+        dot_sigma = 2 * eps * n.I_inj * sqrt(n.toM * n.toS) * sqrt(1+ n.sigmaS - n.sigmaF)* quotient            
+    else:
+        dot_sigma = np.clip(dot_sigma, 300, 500) 
+          
+    return dot_sigma
 
 def update_neuron(neurone, t):
     neurone.sigmaS += dt * f_sigmaS(neurone, t)
