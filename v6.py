@@ -1,4 +1,4 @@
-#python3 v5.py
+#python3 v6.py
 #!/usr/bin/env python
 import cv2
 from mediapipe import solutions
@@ -161,6 +161,16 @@ def rescale_frame(frame, percent):
     dim = (width, height)
     return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
 
+
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+'''
+def calculate_angle(landmark1, landmark2):
+    angle = math.degrees(math.atan2(landmark2.y - landmark1.y, landmark2.x - landmark1.x) -
+    return abs(angle)'''
+
 ###############################################################################################
 ###############################################################################################
 ###############################################################################################
@@ -207,7 +217,7 @@ def hands_tracking():
                     y_pixel = int(wrist.y * frame.shape[0])
                     cv2.circle(frame, (x_pixel, y_pixel), 10, (200, 0, 200), -1) # Lilac color for the wrist point
                     
-                    # detect wich hand is moving
+                    # detect wich hand is moving new to v6___________________------------
                     if x_pixel < frame.shape[1] // 2:
                         side= 'L'
                     else:
@@ -255,14 +265,14 @@ def hands_tracking():
 class NeuroneRS : pass  #car pas vraie prog obj
 
 ########################################################
-###             Ã©tat du neurone instant t            ###
+###             etat du neurone instant t            ###
 ########################################################  
 
 def create_NRS(nom, I_inj, w_inj, V, sigmaS,sigmaF, Af, q):
     neurone = NeuroneRS()
     neurone.nom =  nom 
-    neurone.I_inj = I_inj   # courant d'entrÃ©e:  peut etre une somme de courants
-    neurone.w_inj =  w_inj  # poids synaptique courant d'entrÃ©e 
+    neurone.I_inj = I_inj   # courant d'entree:  peut etre une somme de courants
+    neurone.w_inj =  w_inj  # poids synaptique courant d'entree 
     neurone.V=  V           # output neurone- on rappelle V = Vs et la derivee peut se noter y au lieu de Vs point-
     neurone.sigmaS =  sigmaS 
     neurone.sigmaF =  sigmaF 
@@ -275,7 +285,7 @@ def create_NRS(nom, I_inj, w_inj, V, sigmaS,sigmaF, Af, q):
 
 
 ########################################################
-###          fonctions basiques nÃ©cessaire           ###
+###          fonctions basiques necessaires           ###
 ######################################################## 
 
 #fonction crÃ©e pour raccourcir la notation, aussi appelÃ©e F dans les articles
@@ -387,16 +397,24 @@ def plot(Vs1, Ts1, I_inj1, sigmaS):
     plt.show()
 
 
+###############################################################################################
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
+
 def control_robot_hand(session, side, x_pixel):
     # Get the services ALMotion & ALRobotPosture.
     motion_service = session.service("ALMotion")
     posture_service = session.service("ALRobotPosture")
 
-    # Wake up robot
+    #Wake up robot
     motion_service.wakeUp()
 
     # Send robot to Stand Init
-    posture_service.goToPosture("StandInit", 0.5)
+    posture_service.goToPosture("StandInit", 0.2)
+    motion_service.setAngles("RShoulderPitch", 0.45, 0.2) #26 deg en rad
+    motion_service.setAngles("RElbowRoll", 1.2, 0.2) # 71 deg en rad
 
     # Captured x-pixel movement from camera are converted to an angle
     if x_pixel is not None:
@@ -404,13 +422,17 @@ def control_robot_hand(session, side, x_pixel):
         angle = angle * 1.5     # Scale the angle to a reasonable range for the robot's arm
 
         # Move the side detected arm based on the calculated angle
-        names = [side+"ShoulderPitch", side+"ShoulderRoll"]
-        targetAngles = [angle, angle]
-        maxSpeedFraction = 0.2  # Using 20% of maximum joint speed
-        motion_service.angleInterpolationWithSpeed(names, targetAngles, maxSpeedFraction)
+        #names = [side+"ElbowYaw"] #-------------------------------------------------------------<<<<<
+        #names = ["RElbowYaw"]
+
+        #range/ ElboYaw min = 16 = dans la tablette, max= 117 = à plat del'autre coté avant que ca soit uncanny
+        
+        maxSpeedFraction = 0.05  # Using 5% of maximum joint speed
+        #motion_service.changeAngles(names, targetAngle, maxSpeedFraction)
+        motion_service.changeAngles("RElbowYaw", 0.2, 0.1)  # TEST    TEST    TEST
 
     # Go to rest position
-    motion_service.rest()
+    #motion_service.rest()
 
 
 ###############################################################################################

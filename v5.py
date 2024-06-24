@@ -253,9 +253,9 @@ class NeuroneRS : pass  #car pas vraie prog obj
 def create_NRS(nom, I_inj, w_inj, V, sigmaS,sigmaF, Af, q):
     neurone = NeuroneRS()
     neurone.nom =  nom 
-    neurone.I_inj = I_inj  # courant d'entrée:  peut etre une somme de courants
-    neurone.w_inj =  w_inj  # poids synaptique courant d'entrée 
-    neurone.V=  V    # output neurone- on rappelle V = Vs et la dérivée peut se noter y au lieu de Vs point-
+    neurone.I_inj = I_inj  # courant d'entre:  peut etre une somme de courants
+    neurone.w_inj =  w_inj  # poids synaptique courant d'entree 
+    neurone.V=  V    # output neurone- on rappelle V = Vs et la derivee peut se noter y au lieu de Vs point-
     neurone.sigmaS =  sigmaS 
     neurone.sigmaF =  sigmaF 
     neurone.Af =Af
