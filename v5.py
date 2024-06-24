@@ -212,7 +212,7 @@ def hands_tracking():
                     lmlist=(x_pixel,y_pixel)
                     
                     t = time.time() - start_time
-                    I_inj = x_pixel #ici! ---------------------------------------------------------------------
+                    I_inj =x_pixel #x_pixel #ici! --------------------------------------------------------------------- à normaliser
                     neur.I_inj = I_inj
                     V, sigmaS, q = update_neuron(neur, t)
                     
