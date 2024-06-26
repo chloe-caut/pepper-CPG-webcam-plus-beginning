@@ -175,7 +175,7 @@ def hands_tracking():
     neur = create_NRS(nom='RS1', I_inj = 0.0, w_inj=w_inj_1, V=0.001, sigmaS=30 ,sigmaF=2,Af=0.2,q=0.01) #winj 1 def en haut!!!!!!!!!!!!!!!!!!!!
     
     #Create 5 empty lists
-    L, list_V, list_T, list_I_inj, list_sigmaS = [],[],[],[],[]
+    L, list_V, list_T, list_I_inj, list_sigmaS , inj_test= [],[],[],[],[],[]  #------------------------------------------
     
     # Initialize video capture
     vidcap = cv2.VideoCapture(0) #(vidpath) #pour une vidéo enregistrée
@@ -212,13 +212,20 @@ def hands_tracking():
                     lmlist=(x_pixel,y_pixel)
                     
                     t = time.time() - start_time
-                    I_inj =x_pixel #x_pixel #ici! --------------------------------------------------------------------- à normaliser
+                    #---------------------------- --------------------------------------------------------------------- ##################
+                    #test normalisation crado
+                    if len(list_I_inj)> 30:
+                        I_inj = x_pixel - ( inj_test[5] + inj_test[15] + inj_test[25] ) /3 
+                    else:
+                        I_inj = 2
+                    #---------------------------- --------------------------------------------------------------------- ##################
                     neur.I_inj = I_inj
                     V, sigmaS, q = update_neuron(neur, t)
                     
                     list_V.append(V)
                     list_T.append(t)
                     list_I_inj.append(I_inj)
+                    inj_test.append(x_pixel) #------------------------------------------------------
                     list_sigmaS.append(sigmaS)
                     L.append(lmlist)
         

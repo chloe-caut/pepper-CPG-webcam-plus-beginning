@@ -8,6 +8,8 @@ from math import sqrt, degrees, atan2
 import time
 import matplotlib.pyplot as plt
 
+#python3 v8.py
+
 # Initialize mediapipe hands module
 mphands = solutions.hands
 mpdrawing = solutions.drawing_utils
