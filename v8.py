@@ -194,7 +194,7 @@ def control_robot_hand(session, side, wrist_landmark_time1, wrist_landmark_time2
 
 def hands_tracking(session):
     video_service = session.service("ALVideoDevice")
-    video_client = video_service.subscribeCamera("python_client", 0, 2, 11, 30)
+    video_client = video_service.subscribeCamera("python_client", 0, 1, 11, 30)
     
     mp_drawing = solutions.drawing_utils
     neur = NeuronRS(nom='RS1', I_inj=0.0, w_inj=0.5, V=0.001, sigmaS=30, sigmaF=2, Af=0.2, q=0.01)
@@ -220,13 +220,13 @@ def hands_tracking(session):
                 image.flags.writeable = True
                 if results.multi_hand_landmarks:
                     for hand_landmarks,handedness in zip(results.multi_hand_landmarks, results.multi_handedness):
-                        '''
+                        
                         mp_drawing.draw_landmarks(
                             image,
                             hand_landmarks,
                             solutions.hands.HAND_CONNECTIONS,
                             hand_landmark_style=get_hand_landmarks_style(),
-                            hand_connection_style=get_hand_connections_style()) '''
+                            hand_connection_style=get_hand_connections_style())
                         print(hand_landmarks)
                         
                         # Get the current wrist landmark
