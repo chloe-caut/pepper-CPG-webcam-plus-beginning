@@ -2,14 +2,20 @@
 spring summer 2024
 
 short term goal: have pepper mirror a person's hand movement. 
-internship goal: evaluate the interaction based on sychronisation & who' leading the movement etc etc, see job desc for more.
+internship goal: evaluate the interaction based on sychronisation & who's leading the movement etc etc, see job desc for more.
 
 versions 0 to 3: hand tracking, either with robot camera (mouth) or with laptop webcam.
 v4 skipped
+
 v5: on laptop, feeding hand movement to a CPG model with hebbian learning, real time, graph drawn at the end. 
 next versions: using robot camera, feeding CPG output to the robot to guide pepper's hand movements. (ros needed)
+see v5-NEW for version with coupled neurons
+
+v8 etc for robot
 
 
+
+#############
 job desc: 
 
 Le sujet de ce stage concerne le renforcement de la coordination motrice d’enfants atteints du
