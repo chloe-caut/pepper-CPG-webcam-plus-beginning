@@ -18,36 +18,40 @@ devenus) ont aussi bien souvent des troubles de la coordination motrice qui impa
 interactions sociales. On sait en effet que les postures et les mouvements rythmiques des
 membres, supérieurs notamment, sont une des modalités importantes de l’interaction sociale
 entre les humains.
+
 Ce sujet de stage propose de développer des algorithmes de renforcement de la coordination
 motrice pour les personnes ASD, en utilisant un robot humanoïde Pepper dont les
 mouvements et postures seront commandés par des “central pattern génerators” ou CPG qui
 sont de réseaux de neurones inspirés des structures neuronales situées dans la moelle
 épinière des mammifères et qui sont en charge du contrôle des mouvements rythmiques.
+
 L’objectif de ce travail est que le robot, en regardant la personne, aura la propriété de se
 synchroniser sur ses mouvements, autant que la personne se synchronisera sur les
 mouvements du robot. La capacité de coordination motrice du robot étant parfaitement
 contrôlable et modulable selon le réglage de certains paramètres des CPG, on peut imaginer
-une thérapie de rééducation de la coordination motrice de la personne. En effet, dans une
-telle interaction, le robot peut être réglé selon plusieurs rôles : un rôle de meneur dans lequel
+une thérapie de rééducation de la coordination motrice de la personne. 
+
+En effet, dans une telle interaction, le robot peut être réglé selon plusieurs rôles : un rôle de meneur dans lequel
 la personne doit suivre les gestes du robot sans que celui-ci puisse faire converger son rythme
 vers celui de de la personne, un rôle d'apprenant dans lequel il se synchronise sur les gestes
 de la personne, aidant cette dernière à coordonner ses mouvements (synchronisation
 mutuelle) et enfin, un rôle mixte dans lequel le robot prend alternativement un rôle puis l'autre.
 Cette dernière condition perturbe ainsi la synchronisation mutuelle, ce qui permet de renforcer
 les compétences motrices de la personne.
+
 Un autre point important de ce travail concerne l’étude des mécanismes de l’attention de la
 personne sur la tâche à réaliser. Des indicateurs comme le temps d’exercices, la fréquence
 de travail, la qualité de l’exercice etc... doivent être mesurés pour quantifier l'engagement de
-la personne lors de cette interaction. Il serait intéressant de regarder si l’engagement est plus
-important lorsque l’homme se synchronise sur le robot ou l’inverse. Une mesure concernant
+la personne lors de cette interaction. 
+Il serait intéressant de regarder si l’engagement est plus important lorsque l’homme se synchronise sur le robot ou l’inverse. Une mesure concernant
 la pertinence de l’usage du robot par rapport à un travail avec un thérapeute sera également
 important pour identifier des avantages et des manques d’une thérapie de rééducation de la
 coordination motrice avec un robot.
-Ce travail s’appuie sur des travaux déjà réalisés sur ce sujet (du code existe déjà et les
-modèles de CPG sont bien maîtrisés)
 
-Pour mener à bien ce travail, le stagiaire devra suivre les étapes suivantes (pas forcément de
-manière chronologique):
+
+Ce travail s’appuie sur des travaux déjà réalisés sur ce sujet (du code existe déjà et les modèles de CPG sont bien maîtrisés)
+
+Pour mener à bien ce travail, le stagiaire devra suivre les étapes suivantes (pas forcément de manière chronologique):
 
 1. Etude bibliographique sur les CPG et les mécanismes de l’attention dans l'interaction
 humain/robot
