@@ -13,6 +13,8 @@ import scipy.signal
 import numpy as np
 import matplotlib.pyplot as plt
 
+#python3 v5-NEW-couplage.py
+
 # Initialize mediapipe hands module
 mphands = solutions.hands
 mpdrawing = solutions.drawing_utils

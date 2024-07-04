@@ -188,6 +188,7 @@ def calculate_angle(wrist_landmark_time1, wrist_landmark_time2):
     angle = degrees(atan2(WL_t2y - WL_t1y, WL_t2x - WL_t1x))
     # Transform degress in radians (1 deg = 0,0174533 rad)
     angle_Rad = angle*0.0174533
+    # Limit the angle between min and max
     if angle_Rad < min : 
         angle_Rad = min
     elif angle_Rad > max :
@@ -199,14 +200,32 @@ def control_robot_hand(session, side, wrist_landmark_time1, wrist_landmark_time2
     posture_service = session.service("ALRobotPosture")
 
     try:
+        useSensors    = False
+        commandAngles = motion_service.getAngles(['LElbowRoll'], useSensors)
+        print(commandAngles)
+
         motion_service.wakeUp()
-        posture_service.goToPosture("StandInit", 0.5)
+        #posture_service.goToPosture("StandInit", 0.5)
+        #######################
+        motion_service.setAngles(['RShoulderPitch'], [0.45] , [0.2])  #26 degs bras
+        motion_service.setAngles(['RElbowRoll'], [1.2], [0.2])  #71degs avant bras 
+        motion_service.setAngles(['LShoulderPitch'], [0.45] , [0.2])  #26 degs bras
+        motion_service.setAngles(['LElbowRoll'], [-1.2], [0.2])  # 71 degs avant bras
+
+        #######################
+        '''
         angle = calculate_angle(wrist_landmark_time1, wrist_landmark_time2)
         #names = [side + "ShoulderPitch", side + "ShoulderRoll"]
         names = [side+'ElbowYaw']
         maxSpeedFraction = 0.2
         motion_service.changeAngles(names, angle, maxSpeedFraction)
-        motion_service.rest()
+        '''
+
+        useSensors    = False
+        commandAngles = motion_service.getAngles(['LElbowRoll'], useSensors)
+        print(commandAngles)
+
+
     except Exception as e:
         print(f"Error controlling the robot hand: {e}")
     
@@ -285,7 +304,7 @@ def hands_tracking(session):
     finally:
         video_service.unsubscribe(video_client)
         cv2.destroyAllWindows()
-        
+    #motion_service.rest()      
     return L, list_V, list_T, list_I_inj, list_sigmaS    
     
 
