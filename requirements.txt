@@ -1,6 +1,11 @@
-bibliothèques installées !!!
+bibliothèques à installer
 
 pip install opencv-python mediapipe
 sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 sudo apt-get install libgirepository1.0-dev
 pip install PyGObject
+
+
+qi pour commandes robot (et premier jet récup caméra- ensuite il faut utiliser gstreamer):
+
+https://github.com/aldebaran/libqi-python/releases
