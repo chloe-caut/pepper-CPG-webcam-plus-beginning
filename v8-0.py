@@ -6,6 +6,9 @@ import time
 import matplotlib.pyplot as plt
 import argparse
 import qi
+
+#   python3 v8-0.py
+
 # Initialize mediapipe hands module
 mphands = solutions.hands
 mpdrawing = solutions.drawing_utils
@@ -123,7 +126,7 @@ def f_sigmaS(n, t):
     return dot_sigma
 
 def update_neuron(n, t):
-    n.sigmaS = n.sigmaS + dt * f_sigmaS(n, eps, t)
+    n.sigmaS = n.sigmaS + dt * f_sigmaS(n, t)
     n.V = n.V + dt * f_V(n, t)
     n.q = n.q + dt * f_Q(n, t)
     return n.V, n.sigmaS, n.q
@@ -167,6 +170,11 @@ def plot(Vs1, Ts1, I_inj1, sigmaS):
     # Display the plot
     plt.show()
 
+
+########################################################
+###                   traitement                     ###
+########################################################   
+
 def normalise(x):
     min = 0
     max = 550
@@ -189,6 +197,12 @@ def calculate_angle(wrist_landmark_time1, wrist_landmark_time2):
     angle_rad = max(min_angle_rad, min(max_angle_rad, angle_rad))   
     return angle_rad
     
+
+########################################################
+###                        qi                        ###
+######################################################## 
+
+
 def control_robot_hand(session, side, wrist_landmark_time1, wrist_landmark_time2):
     motion_service = session.service("ALMotion")
     posture_service = session.service("ALRobotPosture")
@@ -199,12 +213,17 @@ def control_robot_hand(session, side, wrist_landmark_time1, wrist_landmark_time2
         angle = calculate_angle(wrist_landmark_time1, wrist_landmark_time2)
         names = [side+'ElbowYaw']
         maxSpeedFraction = 0.2
+        #mvt
         motion_service.changeAngles(names, angle, maxSpeedFraction)
         #motion_service.rest()
     except Exception as e:
         print(f"Error controlling the robot hand: {e}")
     
+    ########################################################
+    ###                 hands tracking                   ###
+    ########################################################  
 
+    
 def hands_tracking(session):
     video_service = session.service("ALVideoDevice")
     video_client = video_service.subscribeCamera("python_client", 0, 2, 11, 30)
@@ -303,3 +322,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+###sigma s debut 4 ou 5 

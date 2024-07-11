@@ -319,7 +319,7 @@ def hands_tracking():
                     I_inj = normalise(x_pixel)
                     neur1.I_inj = I_inj
                 
-                    neur1, neur2 = couple_neurons(neur1, neur2, t, coef1=0.05, coef2=0.01)
+                    neur1, neur2 = couple_neurons(neur1, neur2, t, coef1=0.05, coef2=0.05)  ################################ 0.1 test et afficher sorties
                     
                     list_V1.append(neur1.V)
                     list_V2.append(neur2.V)

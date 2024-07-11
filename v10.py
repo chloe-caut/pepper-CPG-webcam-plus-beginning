@@ -9,7 +9,7 @@ import time
 import matplotlib.pyplot as plt
 
 
-# python3 v9.py
+#  python3 v10.py
 
 class HandTrackingApp:
     def __init__(self, ip, port):
@@ -115,8 +115,9 @@ class HandTrackingApp:
     def f_Q(self, n, t):
         return (-n.q + n.sigmaS * n.V) / n.toS
 
-    def f_sigmaS(self, n, eps, t):
+    def f_sigmaS(self, n, t):
         dot_sigma = 400
+        eps = 0.5  ########
         y = self.f_V(n, t)  # y=dV/dt
         racine = sqrt(y**2 + n.V**2)
         
@@ -127,11 +128,13 @@ class HandTrackingApp:
             dot_sigma = 2 * eps * n.I_inj * sqrt(n.toM * n.toS) * sqrt(1 + n.sigmaS - n.sigmaF) * quotient
         else:
             dot_sigma = np.clip(dot_sigma, 300, 500)
+
             
         return dot_sigma
 
     def update_neuron(self, n, t):
-        n.sigmaS = n.sigmaS + self.dt * self.f_sigmaS(n, self.eps, t)
+        print("sigma s : " , n.sigmaS)  ###-------------------------------------
+        n.sigmaS = n.sigmaS + self.dt * self.f_sigmaS(n, t)
         n.V = n.V + self.dt * self.f_V(n, t)
         n.q = n.q + self.dt * self.f_Q(n, t)
         return n.V, n.sigmaS, n.q
@@ -170,6 +173,13 @@ class HandTrackingApp:
         # Display the plot
         plt.show()
 
+
+    ########################################################
+    ###                    traitement                    ###
+    ########################################################  
+
+
+
     def normalise(self, x):
         min = 0
         max = 550
@@ -191,11 +201,20 @@ class HandTrackingApp:
         # Clamp the angle between the min and max values
         angle_rad = max(min_angle_rad, min(max_angle_rad, angle_rad))   
         return angle_rad
+    
+    ########################################################
+    ###                        qi                        ###
+    ########################################################  
 
-    def control_robot_hand(self, motion_service, side, wrist_landmark_time1, wrist_landmark_time2):
+    def control_robot_hand(self, session, side, wrist_landmark_time1, wrist_landmark_time2):
+        motion_service = session.service("ALMotion")
+        posture_service = session.service("ALRobotPosture")
+        motion_service.wakeUp()
+        #posture_service.goToPosture("StandInit", 0.5)
+        
         try:
             # Calculate the angle for the movement
-            angle = 20 #self.calculate_angle(wrist_landmark_time1, wrist_landmark_time2)
+            angle = 0.5 #self.calculate_angle(wrist_landmark_time1, wrist_landmark_time2)
             
             # Create the name for the joint to be moved
             names = [side + 'ElbowYaw']
@@ -203,10 +222,14 @@ class HandTrackingApp:
             
             # Perform the movement
             motion_service.changeAngles(names, angle, maxSpeedFraction)
-            #motion_service.setAngles(names,angle,maxSpeedFraction)
             
         except Exception as e:
             print(f"Error controlling the robot hand: {e}")    
+
+    ########################################################
+    ###                 hands tracking                   ###
+    ########################################################  
+
 
     def hands_tracking(self, session):
         video_service = session.service("ALVideoDevice")
@@ -287,16 +310,6 @@ class HandTrackingApp:
             print ("Can't connect to Naoqi at ip \"" + self.ip + "\" on port " + str(self.port) +".\n"
                 "Please check your script arguments. Run with -h option for help.")
             sys.exit(1)
-
-        # Get the services ALMotion & ALRobotPosture.
-        motion_service = self.session.service("ALMotion")         # control movements of Pepper    
-        posture_service = self.session.service("ALRobotPosture")  # control predefined postures of Pepper
-        
-        # Wake up robot
-        motion_service.wakeUp() 
-
-        # Send robot to Stand Init : 0.5 indicates the average speed of the transition to initial posture
-        posture_service.goToPosture("StandInit", 0.5)
         
         L, list_V, list_T, list_I_inj, list_sigmaS = self.hands_tracking(self.session)
         self.plot(list_V, list_T, list_I_inj, list_sigmaS)
