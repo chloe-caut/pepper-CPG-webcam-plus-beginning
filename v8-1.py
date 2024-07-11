@@ -8,7 +8,7 @@ from math import sqrt, degrees, atan2
 import time
 import matplotlib.pyplot as plt
 
-#python3 v8.py
+# python3 v8-1.py
 
 # Initialize mediapipe hands module
 mphands = solutions.hands
@@ -274,6 +274,8 @@ def hands_tracking(session):
     
 
 def main():
+
+   
     parser = argparse.ArgumentParser()
     parser.add_argument("--ip", type=str, default="192.168.1.147", help="Robot IP address")
     parser.add_argument("--port", type=int, default=9559, help="Robot port number")
@@ -284,6 +286,8 @@ def main():
         session.connect(f"tcp://{args.ip}:{args.port}")
         L, list_V, list_T, list_I_inj, list_sigmaS = hands_tracking(session)
         
+    
+    
     except KeyboardInterrupt:
         print("\nInterrupted by user")
     except Exception as e:

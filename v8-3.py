@@ -123,13 +123,18 @@ def f_sigmaS(n, eps, t):
         dot_sigma = np.clip(dot_sigma, 300, 500)
         
     return dot_sigma
-
+'''
 def update_neuron(neurone, t):
     neurone.sigmaS += 0.01 * f_sigmaS(neurone, eps, t)
     neurone.V += 0.01 * f_V(neurone, t)
     neurone.q += 0.01 * f_Q(neurone, t)
     return neurone.V, neurone.sigmaS, neurone.q
-
+'''
+def update_neuron(n, t):
+    n.sigmaS = n.sigmaS + dt * f_sigmaS(n, eps, t)
+    n.V = n.V + dt * f_V(n, t)
+    n.q = n.q + dt * f_Q(n, t)
+    return n.V, n.sigmaS, n.q
 
 ########################################################
 ###                      dessin                      ###
@@ -290,30 +295,36 @@ def hands_tracking(session):
 
 def main(session):
     # Get the services ALMotion & ALRobotPosture.
-    motion_service = session.service("ALMotion")
-    posture_service = session.service("ALRobotPosture")
+    motion_service = session.service("ALMotion")         # control movements of Pepper    
+    posture_service = session.service("ALRobotPosture")  # control predefined postures of Pepper
 
     # Wake up robot
-    motion_service.wakeUp()
+    motion_service.wakeUp() 
 
-    # Send robot to Stand Init
+    # Send robot to Stand Init : 0.5 indicates the average speed of the transition to initial posture
     posture_service.goToPosture("StandInit", 0.5)
     
-    # Move both arms to an initial position
+    '''
+    # Test move both arms to an initial position
     motion_service.setAngles(['RShoulderPitch'], [0.45], [0.2])  # 26 degrees
     motion_service.setAngles(['RElbowRoll'], [1.2], [0.2])  # 71 degrees
     motion_service.setAngles(['LShoulderPitch'], [0.45], [0.2])  # 26 degrees
     motion_service.setAngles(['LElbowRoll'], [1.2], [0.2])  # 71 degrees
-  
+    '''
     L, list_V, list_T, list_I_inj, list_sigmaS = hands_tracking(session)
     plot(list_V, list_T, list_I_inj, list_sigmaS)
 
 
 if __name__ == "__main__":
+    # Create an object parser that will manage the arguments of command line (here the connectivity parameters to Pepper)
     parser = argparse.ArgumentParser()
     parser.add_argument("--ip", type=str, default="192.168.1.147", help="Robot IP address")
     parser.add_argument("--port", type=int, default=9559, help="Robot port number")
+    
+    # Analyse arguments of the command line and stock them in objet args
     args = parser.parse_args()
+    
+    # Create a new NAOqi session, that is used for connecting to robot.
     session = qi.Session()
     
     try:
