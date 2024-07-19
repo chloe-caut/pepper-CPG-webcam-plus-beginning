@@ -4,11 +4,13 @@ import sys
 import cv2
 from mediapipe import solutions
 import numpy as np
-from math import sqrt, degrees, atan2
+from math import sqrt, degrees, atan2, pi, sin
 import time
 import matplotlib.pyplot as plt
 
-#   python3 v10.py
+#  python3 v10-2.py
+
+
 
 class HandTrackingApp:
     def __init__(self, ip, port):
@@ -104,7 +106,15 @@ class HandTrackingApp:
             self.q = q
             self.toM = 0.35
             self.toS = 3.5
-
+    
+    # signal de forçage, appelé I_inj
+    def Input(self, t):
+        amplitude = 1
+        freq = 2
+        phase = 0
+        I = amplitude * sin(2*pi * freq * t + phase)
+        return I
+    
     def F(self, n):
         return n.V - n.Af * np.tanh((n.sigmaF / n.Af) * n.V)
 
@@ -129,7 +139,18 @@ class HandTrackingApp:
             dot_sigma = np.clip(dot_sigma, 300, 500)
             
         return dot_sigma
-
+    
+    def couple_neurons(self, n1, n2, t, coef1, coef2):
+        # Update n2 with input from n1 and external input
+        n2.I_inj = coef1 * n1.V + coef2 * self.Input(t)
+        n2 = self.update_neuron(n2, t)
+    
+        # Update n1 with input from n2 and external input at t + dt
+        n1.I_inj = coef1 * n2.V + coef2 * self.Input(t + self.dt)
+        n1 = self.update_neuron(n1, t + self.dt)
+    
+        return n1, n2
+    
     def update_neuron(self, n, t):
         n.sigmaS = n.sigmaS + self.dt * self.f_sigmaS(n, t)
         n.V = n.V + self.dt * self.f_V(n, t)
@@ -190,18 +211,14 @@ class HandTrackingApp:
             
         # Clamp the angle between the min and max values
         angle_rad = max(min_angle_rad, min(max_angle_rad, angle_rad))   
-        print(angle_rad)
         return angle_rad
 
     def control_robot_hand(self, session, side, wrist_landmark_time1, wrist_landmark_time2):
-        motion_service = session.service("ALMotion")
-        posture_service = session.service("ALRobotPosture")
+        motion_service = self.session.service("ALMotion")
         motion_service.wakeUp()
-        posture_service.goToPosture("StandInit", 0.5)
-        
         try:
             # Calculate the angle for the movement
-            angle = 20 #self.calculate_angle(wrist_landmark_time1, wrist_landmark_time2)
+            angle = self.calculate_angle(wrist_landmark_time1, wrist_landmark_time2)
             
             # Create the name for the joint to be moved
             names = [side + 'ElbowYaw']
@@ -218,8 +235,11 @@ class HandTrackingApp:
         self.video_client = video_service.subscribeCamera("python_client", 0, 2, 11, 30)
         
         mp_drawing = solutions.drawing_utils
-        neur = self.NeuronRS(nom='RS1', I_inj=0.0, w_inj=0.5, V=0.001, sigmaS=30, sigmaF=2, Af=0.2, q=0.01)
-        L, list_V, list_T, list_I_inj, list_sigmaS = [], [], [], [], []
+        #initialize neurons
+        neur1 = self.NeuronRS(nom='RS1', I_inj=0.01, w_inj=0.5, V=0.001, sigmaS=30, sigmaF=2, Af=0.2, q=0.01)
+        neur2 = self.NeuronRS(nom='RS2', I_inj=0.0, w_inj=0.3, V=0.0, sigmaS=5, sigmaF=3, Af=0.2, q=0.0)
+        
+        L, list_V1, list_V2, list_T, list_I_inj, list_sigmaS1, list_sigmaS2 = [], [], [], [], [], [], []
         
         try:
             with self.mphands.Hands(max_num_hands=1, min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
@@ -254,12 +274,16 @@ class HandTrackingApp:
                         
                             t = time.time() - start_time
                             I_inj = self.normalise(x_pixel)
-                            neur.I_inj = I_inj
-                            V, sigmaS, q = self.update_neuron(neur, t)
-                            list_V.append(V)
+                            
+                            neur1.I_inj = I_inj
+                            neur1, neur2 = self.couple_neurons(neur1, neur2, t, coef1=0.05, coef2=0.02)
+                            
+                            list_V1.append(neur1.V)
+                            list_V2.append(neur2.V)
                             list_T.append(t)
                             list_I_inj.append(I_inj)
-                            list_sigmaS.append(sigmaS)
+                            list_sigmaS1.append(neur1.sigmaS)
+                            list_sigmaS2.append(neur2.sigmaS)
                             L.append(lmlist)
                             
                             if wrist_landmark_time1 is not None:
@@ -280,7 +304,8 @@ class HandTrackingApp:
             video_service.unsubscribe(self.video_client)
             cv2.destroyAllWindows()
         #motion_service.rest()      
-        return L, list_V, list_T, list_I_inj, list_sigmaS    
+        
+        return L, list_V1, list_V2, list_T, list_I_inj, list_sigmaS1, list_sigmaS2 
 
     def main(self):
         # Create a new NAOqi session, that is used for connecting to robot.
@@ -292,9 +317,15 @@ class HandTrackingApp:
             print ("Can't connect to Naoqi at ip \"" + self.ip + "\" on port " + str(self.port) +".\n"
                 "Please check your script arguments. Run with -h option for help.")
             sys.exit(1)
+       
+        # Initialize motion and posture services
         
-        L, list_V, list_T, list_I_inj, list_sigmaS = self.hands_tracking(self.session)
-        self.plot(list_V, list_T, list_I_inj, list_sigmaS)
+        posture_service = self.session.service("ALRobotPosture")
+        
+        posture_service.goToPosture("StandInit", 0.5)
+        
+        L, list_V1, list_V2, list_T, list_I_inj, list_sigmaS1, list_sigmaS2 = self.hands_tracking(self.session)
+        self.plot(list_V1, list_T, list_I_inj, list_sigmaS1)
 
 if __name__ == "__main__":
     # Create an object parser that will manage the arguments of command line (here the connectivity parameters to Pepper)
@@ -304,6 +335,8 @@ if __name__ == "__main__":
     
     # Analyse arguments of the command line and stock them in objet args
     args = parser.parse_args()
+    
+    #
     
     # Initialize and run the hand tracking app
     app = HandTrackingApp(args.ip, args.port)
